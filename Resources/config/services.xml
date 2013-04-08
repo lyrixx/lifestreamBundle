@@ -6,80 +6,57 @@
 
     <parameters>
         <!-- global conf -->
-        <parameter key="lx.lifestream.stream.max_items">10</parameter>
-        <parameter key="lx.lifestream.cache.maxage">3600</parameter>
+        <parameter key="lyrixx.lifestream.stream.max_items">10</parameter>
+        <parameter key="lyrixx.lifestream.cache.maxage">3600</parameter>
 
-        <!-- Class -->
-        <parameter key="lx.lifestream.http_client.class">Buzz\Browser</parameter>
-
-        <parameter key="lx.lifestream.rss_processor.class">Lifestream\Toolkit\FeedProcessor\RssProcessor</parameter>
-        <parameter key="lx.lifestream.atom_processor.class">Lifestream\Toolkit\FeedProcessor\AtomProcessor</parameter>
-        <parameter key="lx.lifestream.lastfm_processor.class">Lifestream\Toolkit\FeedProcessor\LastfmProcessor</parameter>
-        <parameter key="lx.lifestream.flickr_processor.class">Lifestream\Toolkit\FeedProcessor\FlickrProcessor</parameter>
-
-        <parameter key="lx.lifestream.atom.class">Lifestream\Model\Service\Atom</parameter>
-        <parameter key="lx.lifestream.rss.class">Lifestream\Model\Service\Rss</parameter>
-        <parameter key="lx.lifestream.twitter.class">Lifestream\Model\Service\Twitter</parameter>
-        <parameter key="lx.lifestream.delicious.class">Lifestream\Model\Service\Delicious</parameter>
-        <parameter key="lx.lifestream.github.class">Lifestream\Model\Service\Github</parameter>
-        <parameter key="lx.lifestream.lastfm.class">Lifestream\Model\Service\Lastfm</parameter>
-        <parameter key="lx.lifestream.flickr.class">Lifestream\Model\Service\Flickr</parameter>
+        <!-- Service class -->
+        <parameter key="lyrixx.lifestream.service.twitter.class">Lyrixx\Lifestream\Service\Twitter</parameter>
+        <parameter key="lyrixx.lifestream.service.twitter_search.class">Lyrixx\Lifestream\Service\TwitterSearch</parameter>
+        <parameter key="lyrixx.lifestream.service.twitter_list.class">Lyrixx\Lifestream\Service\TwitterList</parameter>
+        <parameter key="lyrixx.lifestream.service.github.class">Lyrixx\Lifestream\Service\Github</parameter>
+        <parameter key="lyrixx.lifestream.service.rss20.class">Lyrixx\Lifestream\Service\Rss20</parameter>
+        <parameter key="lyrixx.lifestream.service.atom.class">Lyrixx\Lifestream\Service\Atom</parameter>
     </parameters>
 
-
     <services>
-        <!--  HttpClient -->
-        <service id="lx.lifestream.http_client" class="%lx.lifestream.http_client.class%" public="false" />
+        <!--  Client -->
+        <service id="lyrixx.lifestream.client" class="Guzzle\Http\Client" public="false" />
 
-        <!--  Feed Processor -->
-        <service id="lx.lifestream.rss_processor" class="%lx.lifestream.rss_processor.class%" public="false">
-            <argument type="service" id="lx.lifestream.http_client" />
-        </service>
-        <service id="lx.lifestream.atom_processor" class="%lx.lifestream.atom_processor.class%" public="false">
-            <argument type="service" id="lx.lifestream.http_client" />
-        </service>
-        <service id="lx.lifestream.lastfm_processor" class="%lx.lifestream.lastfm_processor.class%" public="false">
-            <argument type="service" id="lx.lifestream.http_client" />
-        </service>
-        <service id="lx.lifestream.flickr_processor" class="%lx.lifestream.flickr_processor.class%" public="false">
-            <argument type="service" id="lx.lifestream.http_client" />
+        <!-- Factory -->
+        <service id="lyrixx.lifestream.factory" class="Lyrixx\Lifestream\LifestreamFactory">
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
 
-        <!-- Service Mapper -->
-        <service id="lx.lifestream.atom" class="%lx.lifestream.atom.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.atom_processor" />
-            </call>
+        <!-- Lifestream -->
+        <service id="lyrixx.lifestream.lifestream" class="Lyrixx\Lifestream\Lifestream" abstract="true">
+            <argument /> <!-- Service  -->
         </service>
-        <service id="lx.lifestream.rss" class="%lx.lifestream.rss.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.rss_processor" />
-            </call>
+
+        <!-- Service -->
+        <service id="lyrixx.lifestream.service.twitter" class="%lyrixx.lifestream.service.twitter.class%" abstract="true" public="false">
+            <argument /><!-- username -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
-        <service id="lx.lifestream.twitter" class="%lx.lifestream.twitter.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.rss_processor" />
-            </call>
+        <service id="lyrixx.lifestream.service.twitter_search" class="%lyrixx.lifestream.service.twitter_search.class%" abstract="true" public="false">
+            <argument /><!-- search -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
-        <service id="lx.lifestream.delicious" class="%lx.lifestream.delicious.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.rss_processor" />
-            </call>
+        <service id="lyrixx.lifestream.service.twitter_list" class="%lyrixx.lifestream.service.twitter_list.class%" abstract="true" public="false">
+            <argument /><!-- username -->
+            <argument /><!-- list -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
-        <service id="lx.lifestream.github" class="%lx.lifestream.github.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.atom_processor" />
-            </call>
+        <service id="lyrixx.lifestream.service.github" class="%lyrixx.lifestream.service.github.class%" abstract="true" public="false">
+            <argument /><!-- username -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
-        <service id="lx.lifestream.lastfm" class="%lx.lifestream.lastfm.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.lastfm_processor" />
-            </call>
+        <service id="lyrixx.lifestream.service.rss20" class="%lyrixx.lifestream.service.rss20.class%" abstract="true" public="false">
+            <argument /><!-- username -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
-        <service id="lx.lifestream.flickr" class="%lx.lifestream.flickr.class%">
-            <call method="setFeedProcessor">
-                <argument type="service" id="lx.lifestream.flickr_processor" />
-            </call>
+        <service id="lyrixx.lifestream.service.atom" class="%lyrixx.lifestream.service.atom.class%" abstract="true" public="false">
+            <argument /><!-- username -->
+            <argument type="service" id="lyrixx.lifestream.client" />
         </service>
     </services>
 </container>

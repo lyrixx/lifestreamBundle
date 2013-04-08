@@ -1,27 +1,26 @@
 <?php
 
-namespace Lx\LifestreamBundle\Controller;
+namespace Lyrixx\Bundle\LifestreamBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-    public function indexAction($serviceName, $username)
+    /**
+     * This is just a demo. Do not use it in prod.
+     */
+    public function indexAction(Request $request, $serviceName, $username)
     {
-        $service = $this->get('lx.lifestream.'.$serviceName);
-        $service->setUsername($username);
+        $lifestream = $this
+            ->get('lyrixx.lifestream.factory')
+            ->createLifestream($serviceName, array($username))
+        ;
 
-        $maxItemDefault = $this->container->getParameter('lx.lifestream.stream.max_items');
-        $maxItem = (int) $this->getRequest()->get('maxItem', $maxItemDefault);
-        $stream = $service->processFeed()->getStream($maxItem);
-
-        $response = $this->render('LxLifestreamBundle:Default:index.html.twig', array(
-            'service'       => $service,
-            'serviceName'   => $serviceName,
-            'username'      => $username,
-            'stream'        => $stream,
+        $response = $this->render('LyrixxLifestreamBundle:Default:index.html.twig', array(
+            'lifestream' => $lifestream->boot(),
         ));
-        $response->setMaxAge($this->container->getParameter('lx.lifestream.cache.maxage'));
+        $response->setMaxAge($this->container->getParameter('lyrixx.lifestream.cache.maxage'));
 
         return $response;
     }

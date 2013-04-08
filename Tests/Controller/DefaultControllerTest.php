@@ -1,6 +1,6 @@
 <?php
 
-namespace Lx\LifestreamBundle\Tests\Controller;
+namespace Lyrixx\Bundle\LifestreamBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

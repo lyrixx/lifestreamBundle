@@ -1,15 +1,19 @@
-{% block lx_lifestream %}
-    <p><a href="{{ service.ServiceURL }}" target="_blank">{{ serviceName|capitalize }} : {{ username|capitalize }}</a></p>
-    <ul>
-        {% for status in stream %}
-            <li>
-                {{ status.text }}
-                {% if status.url is defined %}
-                    <a href="{{ status.url }}" target="_blank">=></a>
-                {% endif %}
-            </li>
-        {% else %}
-            <li>There is no status</li>
-        {% endfor %}
-    </ul>
-{% endblock %}
+<p>
+    <a href="{{ lifestream.service.profileUrl }}" target="_blank">
+        {{ lifestream.service.name }}
+    </a>
+</p>
+<ul>
+    {% for status in lifestream.stream %}
+        <li>
+            {{ status.text }}
+            {% if status.url %}
+                <a href="{{ status.url }}" target="_blank">
+                    <small>(open)</small>
+                </a>
+            {% endif %}
+        </li>
+    {% else %}
+        <li>There is no status</li>
+    {% endfor %}
+</ul>

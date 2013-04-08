@@ -1,6 +1,6 @@
 <?php
 
-namespace Lx\LifestreamBundle\DependencyInjection;
+namespace Lyrixx\Bundle\LifestreamBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -18,22 +18,25 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('lx_lifestream');
+        $rootNode = $treeBuilder->root('lyrixx_lifestream');
 
-//        $rootNode
-//            ->children()
-//                ->arrayNode('services')
-//                    ->useAttributeAsKey('name')
-//                    ->prototype('array')
-//                    ->children()
-//                        ->arrayNode('usernames')
-//                            ->useAttributeAsKey('name')
-//                            ->prototype('array')
-//                        ->end()
-//                    ->end()
-//                ->end()
-//            ->end()
-//        ;
+       $rootNode
+            ->children()
+                ->arrayNode('lifestream')
+                    ->prototype('array')
+                    ->children()
+                        ->scalarNode('service')
+                            ->isRequired()->cannotBeEmpty()
+                        ->end()
+                        ->arrayNode('args')
+                            ->requiresAtLeastOneElement()
+                            ->prototype('scalar')->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
+
         return $treeBuilder;
     }
 }
