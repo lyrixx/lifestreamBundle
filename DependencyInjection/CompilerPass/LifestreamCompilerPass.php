@@ -14,30 +14,45 @@ class LifestreamCompilerPass implements CompilerPassInterface
     {
         $config = $container->getParameter('lyrixx.lifestream.config');
 
+        $services = array();
+        foreach ($container->findTaggedServiceIds('lyrixx.lifestream.service') as $id => $tags) {
+            foreach ($tags as $tag) {
+                foreach ($tag as $attribute => $alias) {
+                    if ('alias' == $attribute) {
+                        $services[$alias] = $id;
+                    }
+                }
+            }
+        };
+
         foreach ($config['lifestream'] as $key => $config) {
-            try {
-                $definitionOriginal = $container->getDefinition('lyrixx.lifestream.service.'.$config['service']);
-            } catch (\InvalidArgumentException $e) {
+            $service = $config['service'];
+
+            if (!array_key_exists($service, $services)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'The lifestream "%s"of type "%s" is based on an unexistant type',
+                    'The lifestream "%s"of type "%s" is based on an unexistant type. Available services: "%s".',
                     $key,
-                    $config['service']
+                    $service,
+                    implode('", "', array_keys($services))
                 ));
             }
 
+            $serviceId = $services[$service];
+            $serviceDefinition = $container->getDefinition($serviceId);
+
             $nbArg = count($config['args']);
-            $nbArgMax = count($definitionOriginal->getArguments()) - 1;
+            $nbArgMax = count($serviceDefinition->getArguments()) - 1;
             if ($nbArg > $nbArgMax) {
                 throw new OutOfBoundsException(sprintf(
-                    'The lifestream "%s" of type "%s" contains too much arguments (%d). It can contains at maximum %d.',
+                    'The lifestream "%s" of type "%s" contains too much arguments (%d). It can contains at maximum %d argument(s).',
                     $key,
-                    $config['service'],
+                    $service,
                     $nbArg,
                     $nbArgMax
                 ));
             }
 
-            $serviceDefinition = new DefinitionDecorator('lyrixx.lifestream.service.'.$config['service']);
+            $serviceDefinition = new DefinitionDecorator($serviceId);
             foreach ($config['args'] as $k => $arg) {
                 $serviceDefinition->replaceArgument($k, $arg);
             }
