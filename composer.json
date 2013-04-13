@@ -1,15 +1,19 @@
 {
-    "name": "lyrixx/lifestream-bundle",
-    "description": "Symfony2 Bundle to interact with lyrixx/lifestream",
-    "authors": [
+    "name"        : "lyrixx/lifestream-bundle",
+    "description" : "Symfony2 Bundle to interact with lyrixx/lifestream",
+    "keywords"    : [ "lifestream", "bundle" ],
+    "homepage"    : "http://lyrixx.github.io/lifestream/",
+    "type"        : "bundle",
+    "license"     : "MIT",
+    "authors"     : [
         {
-            "name": "Grégoire Pineau",
-            "email": "lyrixx@lyrixx.info"
+            "name":     "Grégoire Pineau",
+            "email":    "lyrixx@lyrixx.info",
+            "homepage": "http://gregoirepineau.fr"
         }
     ],
-    "license": "MIT",
     "require": {
-        "lyrixx/lifestream": "dev-master"
+        "lyrixx/lifestream": "1.0.*@dev"
     },
     "autoload": {
         "psr-0": { "Lyrixx\\Bundle\\LifestreamBundle": "" }
