@@ -9,6 +9,9 @@
         <parameter key="lyrixx.lifestream.stream.max_items">10</parameter>
         <parameter key="lyrixx.lifestream.cache.maxage">3600</parameter>
 
+        <!-- Lifestream -->
+        <parameter key="lyrixx.lifestream.lifestream.class">Lyrixx\Lifestream\Lifestream</parameter>
+
         <!-- Service class -->
         <parameter key="lyrixx.lifestream.service.twitter.class">Lyrixx\Lifestream\Service\Twitter</parameter>
         <parameter key="lyrixx.lifestream.service.twitter_search.class">Lyrixx\Lifestream\Service\TwitterSearch</parameter>
@@ -16,6 +19,15 @@
         <parameter key="lyrixx.lifestream.service.github.class">Lyrixx\Lifestream\Service\Github</parameter>
         <parameter key="lyrixx.lifestream.service.rss20.class">Lyrixx\Lifestream\Service\Rss20</parameter>
         <parameter key="lyrixx.lifestream.service.atom.class">Lyrixx\Lifestream\Service\Atom</parameter>
+
+        <!-- Formatter class -->
+        <parameter key="lyrixx.lifestream.formatter.link.class">Lyrixx\Lifestream\Formatter\Link</parameter>
+        <parameter key="lyrixx.lifestream.formatter.twitter_hashtag.class">Lyrixx\Lifestream\Formatter\TwitterHashtag</parameter>
+        <parameter key="lyrixx.lifestream.formatter.twitter_mention.class">Lyrixx\Lifestream\Formatter\TwitterMention</parameter>
+
+        <!-- Filter -->
+        <parameter key="lyrixx.lifestream.filter.twitter_mention.class">Lyrixx\Lifestream\Filter\TwitterMention</parameter>
+        <parameter key="lyrixx.lifestream.filter.twitter_retweet.class">Lyrixx\Lifestream\Filter\TwitterRetweet</parameter>
     </parameters>
 
     <services>
@@ -28,11 +40,11 @@
         </service>
 
         <!-- Lifestream -->
-        <service id="lyrixx.lifestream.lifestream" class="Lyrixx\Lifestream\Lifestream" abstract="true">
+        <service id="lyrixx.lifestream.lifestream" class="%lyrixx.lifestream.lifestream.class%" abstract="true">
             <argument /> <!-- Service  -->
         </service>
 
-        <!-- Service -->
+        <!-- Services -->
         <service id="lyrixx.lifestream.service.twitter" class="%lyrixx.lifestream.service.twitter.class%" abstract="true" public="false">
             <argument /><!-- username -->
             <argument type="service" id="lyrixx.lifestream.client" />
@@ -63,6 +75,24 @@
             <argument /><!-- username -->
             <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="atom" />
+        </service>
+
+        <!-- Formatters -->
+        <service id="lyrixx.lifestream.formatter.link" class="%lyrixx.lifestream.formatter.link.class%" public="false">
+            <tag name="lyrixx.lifestream.formatter" alias="link" />
+        </service>
+        <service id="lyrixx.lifestream.formatter.twitter_hashtag" class="%lyrixx.lifestream.formatter.twitter_hashtag.class%" public="false">
+            <tag name="lyrixx.lifestream.formatter" alias="twitter_hashtag" />
+        </service>
+        <service id="lyrixx.lifestream.formatter.twitter_mention" class="%lyrixx.lifestream.formatter.twitter_mention.class%" public="false">
+            <tag name="lyrixx.lifestream.formatter" alias="twitter_mention" />
+        </service>
+        <!-- Filters -->
+        <service id="lyrixx.lifestream.filter.twitter_mention" class="%lyrixx.lifestream.filter.twitter_mention.class%" public="false">
+            <tag name="lyrixx.lifestream.filter" alias="twitter_mention" />
+        </service>
+        <service id="lyrixx.lifestream.filter.twitter_retweet" class="%lyrixx.lifestream.filter.twitter_retweet.class%" public="false">
+            <tag name="lyrixx.lifestream.filter" alias="twitter_retweet" />
         </service>
     </services>
 </container>

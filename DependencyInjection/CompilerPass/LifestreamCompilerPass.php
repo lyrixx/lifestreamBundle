@@ -14,30 +14,16 @@ class LifestreamCompilerPass implements CompilerPassInterface
     {
         $config = $container->getParameter('lyrixx.lifestream.config');
 
-        $services = array();
-        foreach ($container->findTaggedServiceIds('lyrixx.lifestream.service') as $id => $tags) {
-            foreach ($tags as $tag) {
-                foreach ($tag as $attribute => $alias) {
-                    if ('alias' == $attribute) {
-                        $services[$alias] = $id;
-                    }
-                }
-            }
-        };
+        $servicesAvailable = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.service');
+        $formattersAvailable = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.formatter');
+        $filtersAvailable = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.filter');
 
         foreach ($config['lifestream'] as $key => $config) {
-            $service = $config['service'];
+            $this->validateSymfonyServices($service = $config['service'], $servicesAvailable, $key, 'service');
+            $formatters = $this->validateSymfonyServices($config['formatters'], $formattersAvailable, $key, 'formatter');
+            $filters = $this->validateSymfonyServices($config['filters'], $filtersAvailable, $key, 'filter');
 
-            if (!array_key_exists($service, $services)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'The lifestream "%s"of type "%s" is based on an unexistant type. Available services: "%s".',
-                    $key,
-                    $service,
-                    implode('", "', array_keys($services))
-                ));
-            }
-
-            $serviceId = $services[$service];
+            $serviceId = $servicesAvailable[$service];
             $serviceDefinition = $container->getDefinition($serviceId);
 
             $nbArg = count($config['args']);
@@ -60,7 +46,57 @@ class LifestreamCompilerPass implements CompilerPassInterface
 
             $lifestreamDefinition = new DefinitionDecorator('lyrixx.lifestream.lifestream');
             $lifestreamDefinition->replaceArgument(0, new Reference('lyrixx.lifestream.my_service.'.$key));
+
+            foreach ($filters as $k => $filter) {
+                $filters[$k] = new Reference($filtersAvailable[$filter]);
+            }
+            $lifestreamDefinition->addMethodCall('setFilters', array($filters));
+
+            foreach ($formatters as $k => $formatter) {
+                $formatters[$k] = new Reference($formattersAvailable[$formatter]);
+            }
+            $lifestreamDefinition->addMethodCall('setFormatters', array($formatters));
+
             $container->setDefinition('lyrixx.lifestream.my.'.$key, $lifestreamDefinition);
         }
+    }
+
+    private function extractSymfonyServicesAvailable($container, $tag)
+    {
+        $services = array();
+
+        foreach ($container->findTaggedServiceIds($tag) as $id => $tags) {
+            foreach ($tags as $tag) {
+                foreach ($tag as $attribute => $alias) {
+                    if ('alias' == $attribute) {
+                        $services[$alias] = $id;
+                    }
+                }
+            }
+        };
+
+        return $services;
+    }
+
+    private function validateSymfonyServices($symfonyServices, $symfonyServicesAvailable, $key, $type)
+    {
+        if (!is_array($symfonyServices)) {
+            $symfonyServices = array($symfonyServices);
+        }
+
+        foreach ($symfonyServices as $symfonyService) {
+            if (!array_key_exists($symfonyService, $symfonyServicesAvailable)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The lifestream "%s" use an unexistant %s "%s". Available %ss: "%s".',
+                    $key,
+                    $type,
+                    $symfonyService,
+                    $type,
+                    implode('", "', array_keys($symfonyServicesAvailable))
+                ));
+            }
+        }
+
+        return $symfonyServices;
     }
 }
