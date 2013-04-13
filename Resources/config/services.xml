@@ -87,6 +87,7 @@
         <service id="lyrixx.lifestream.formatter.twitter_mention" class="%lyrixx.lifestream.formatter.twitter_mention.class%" public="false">
             <tag name="lyrixx.lifestream.formatter" alias="twitter_mention" />
         </service>
+
         <!-- Filters -->
         <service id="lyrixx.lifestream.filter.twitter_mention" class="%lyrixx.lifestream.filter.twitter_mention.class%" public="false">
             <tag name="lyrixx.lifestream.filter" alias="twitter_mention" />
