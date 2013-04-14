@@ -18,6 +18,9 @@ class LifestreamCompilerPass implements CompilerPassInterface
         $formattersAvailable = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.formatter');
         $filtersAvailable = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.filter');
 
+        $defaultFormatters = $this->validateSymfonyServices($config['formatters'], $formattersAvailable, '__default__', 'formatter');
+        $defaultFilters = $this->validateSymfonyServices($config['filters'], $filtersAvailable, '__default__', 'filters');
+
         foreach ($config['lifestream'] as $key => $config) {
             $this->validateSymfonyServices($service = $config['service'], $servicesAvailable, $key, 'service');
             $formatters = $this->validateSymfonyServices($config['formatters'], $formattersAvailable, $key, 'formatter');
@@ -47,14 +50,10 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $lifestreamDefinition = new DefinitionDecorator('lyrixx.lifestream.lifestream');
             $lifestreamDefinition->replaceArgument(0, new Reference('lyrixx.lifestream.my_service.'.$key));
 
-            foreach ($filters as $k => $filter) {
-                $filters[$k] = new Reference($filtersAvailable[$filter]);
-            }
+            $filters = $this->mergeDefaults($filters, $defaultFilters, $filtersAvailable);
             $lifestreamDefinition->addMethodCall('setFilters', array($filters));
 
-            foreach ($formatters as $k => $formatter) {
-                $formatters[$k] = new Reference($formattersAvailable[$formatter]);
-            }
+            $formatters = $this->mergeDefaults($formatters, $defaultFormatters, $formattersAvailable);
             $lifestreamDefinition->addMethodCall('setFormatters', array($formatters));
 
             $container->setDefinition('lyrixx.lifestream.my.'.$key, $lifestreamDefinition);
@@ -98,5 +97,18 @@ class LifestreamCompilerPass implements CompilerPassInterface
         }
 
         return $symfonyServices;
+    }
+
+    private function mergeDefaults($symfonyServices, $defaultServices, $symfonyServicesAvailable)
+    {
+        $services = array();
+
+        $symfonyServices = array_unique(array_merge($symfonyServices, $defaultServices));
+
+        foreach ($symfonyServices as $symfonyService) {
+            $services[] = new Reference($symfonyServicesAvailable[$symfonyService]);
+        }
+
+        return $services;
     }
 }
