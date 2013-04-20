@@ -60,7 +60,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $r = new \ReflectionClass($class);
             if (!$r->implementsInterface(static::SERVICE_INTERFACE)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'The service "%s" (class: %s; used by the lifestream "%s") does not implements "%s"',
+                    'The service "%s" (class: "%s"; used by the lifestream "%s") does not implements "%s"',
                     $service,
                     $class,
                     $key,
@@ -80,7 +80,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $nbArg = count($args[$key]);
             if ($nbArg > $max) {
                 throw new OutOfBoundsException(sprintf(
-                    'The lifestream "%s" of type "%s" contains too much arguments (%d). It can contains at maximum %d argument(s).',
+                    'The lifestream "%s" of type "%s" contains too much arguments (%d). It should contains at maximum %d argument(s).',
                     $key,
                     $service,
                     $nbArg,
@@ -88,7 +88,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
                 ));
             } elseif ($nbArg < $min) {
                 throw new OutOfBoundsException(sprintf(
-                    'The lifestream "%s" of type "%s" contains too few arguments (%d). It can contains at min %d argument(s).',
+                    'The lifestream "%s" of type "%s" contains too few arguments (%d). It should contains at least %d argument(s).',
                     $key,
                     $service,
                     $nbArg,

@@ -3,6 +3,7 @@
 namespace Lyrixx\Bundle\LifestreamBundle\Tests\DependencyInjection\CompilerPass;
 
 use Lyrixx\Bundle\LifestreamBundle\DependencyInjection\CompilerPass\LifestreamCompilerPass;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -49,10 +50,38 @@ class LifestreamCompilerPassTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Symfony\Component\DependencyInjection\Exception\OutOfBoundsException
-     * @expectedExceptionMessage The lifestream "my" of type "atom" contains too much arguments (4). It can contains at maximum 3 argument(s).
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage The service "wrong_service" (class: "stdClass"; used by the lifestream "my") does not implements "Lyrixx\Lifestream\Service\ServiceInterface"
      */
-    public function testProcessValidateArgs()
+    public function testProcessValidateServiceImplements()
+    {
+        $wrongServiceDefinition = new Definition();
+        $wrongServiceDefinition->setClass('stdClass');
+        $wrongServiceDefinition->addTag('lyrixx.lifestream.service', array('alias' => 'wrong_service'));
+        $this->container->setDefinition('wrong_service', $wrongServiceDefinition);
+
+        $this->container->setParameter('lyrixx.lifestream.config', array(
+            'formatters' => array(),
+            'filters' => array(),
+            'lifestream' => array(
+                'my' => array(
+                    'service' => 'wrong_service',
+                    'args' => array(),
+                    'formatters' => array(),
+                    'filters' => array(),
+                ),
+            ),
+        ));
+
+        $this->compiler->process($this->container);
+    }
+
+
+    /**
+     * @expectedException Symfony\Component\DependencyInjection\Exception\OutOfBoundsException
+     * @expectedExceptionMessage The lifestream "my" of type "atom" contains too much arguments (4). It should contains at maximum 3 argument(s).
+     */
+    public function testProcessValidateArgsMax()
     {
         $this->container->setParameter('lyrixx.lifestream.config', array(
             'formatters' => array(),
@@ -61,6 +90,28 @@ class LifestreamCompilerPassTest extends \PHPUnit_Framework_TestCase
                 'my' => array(
                     'service' => 'atom',
                     'args' => array(1, 2, 3, 4),
+                    'formatters' => array(),
+                    'filters' => array(),
+                ),
+            ),
+        ));
+
+        $this->compiler->process($this->container);
+    }
+
+    /**
+     * @expectedException Symfony\Component\DependencyInjection\Exception\OutOfBoundsException
+     * @expectedExceptionMessage The lifestream "my" of type "atom" contains too few arguments (0). It should contains at least 1 argument(s).
+     */
+    public function testProcessValidateArgsMin()
+    {
+        $this->container->setParameter('lyrixx.lifestream.config', array(
+            'formatters' => array(),
+            'filters' => array(),
+            'lifestream' => array(
+                'my' => array(
+                    'service' => 'atom',
+                    'args' => array(),
                     'formatters' => array(),
                     'filters' => array(),
                 ),
