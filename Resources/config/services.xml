@@ -47,39 +47,24 @@
 
         <!-- Services -->
         <service id="lyrixx.lifestream.service.twitter" class="%lyrixx.lifestream.service.twitter.class%" abstract="true" public="false">
-            <argument /><!-- username -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="twitter" />
         </service>
         <service id="lyrixx.lifestream.service.twitter_search" class="%lyrixx.lifestream.service.twitter_search.class%" abstract="true" public="false">
-            <argument /><!-- search -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="twitter_search" />
         </service>
         <service id="lyrixx.lifestream.service.twitter_list" class="%lyrixx.lifestream.service.twitter_list.class%" abstract="true" public="false">
-            <argument /><!-- username -->
-            <argument /><!-- list -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="twitter_list" />
         </service>
         <service id="lyrixx.lifestream.service.github" class="%lyrixx.lifestream.service.github.class%" abstract="true" public="false">
-            <argument /><!-- username -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="github" />
         </service>
         <service id="lyrixx.lifestream.service.rss20" class="%lyrixx.lifestream.service.rss20.class%" abstract="true" public="false">
-            <argument /><!-- username -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="rss20" />
         </service>
         <service id="lyrixx.lifestream.service.atom" class="%lyrixx.lifestream.service.atom.class%" abstract="true" public="false">
-            <argument /><!-- username -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="atom" />
         </service>
         <service id="lyrixx.lifestream.service.lyrixx.lifestream.service.aggregate" class="%lyrixx.lifestream.service.aggregate.class%" abstract="true" public="false">
-            <argument /><!-- services -->
-            <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="aggregate" />
         </service>
 

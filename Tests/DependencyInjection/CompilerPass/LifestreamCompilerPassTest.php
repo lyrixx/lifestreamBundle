@@ -50,7 +50,7 @@ class LifestreamCompilerPassTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Symfony\Component\DependencyInjection\Exception\OutOfBoundsException
-     * @expectedExceptionMessage The lifestream "my" of type "atom" contains too much arguments (4). It can contains at maximum 1 argument(s).
+     * @expectedExceptionMessage The lifestream "my" of type "atom" contains too much arguments (4). It can contains at maximum 3 argument(s).
      */
     public function testProcessValidateArgs()
     {

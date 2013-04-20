@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\Exception\OutOfBoundsException;
 
 class LifestreamCompilerPass implements CompilerPassInterface
 {
+    const SERVICE_INTERFACE = 'Lyrixx\Lifestream\Service\ServiceInterface';
+
     private $availableServices = array();
     private $availableFilters = array();
     private $availableFormatters = array();
@@ -53,24 +55,50 @@ class LifestreamCompilerPass implements CompilerPassInterface
             }
 
             $serviceId = $this->availableServices[$service];
-            $serviceDefinition = $container->getDefinition($serviceId);
 
+            $class = $container->getParameterBag()->resolveValue($container->getDefinition($serviceId)->getClass());
+            $r = new \ReflectionClass($class);
+            if (!$r->implementsInterface(static::SERVICE_INTERFACE)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The service "%s" (class: %s; used by the lifestream "%s") does not implements "%s"',
+                    $service,
+                    $class,
+                    $key,
+                    static::SERVICE_INTERFACE
+                ));
+            }
+
+            $r = new \ReflectionMethod($class, '__construct');
+            $min = 0;
+            $max = 0;
+            foreach ($r->getParameters() as $param) {
+                $max++;
+                if (!$param->isDefaultValueAvailable()) {
+                    $min++;
+                }
+            }
             $nbArg = count($args[$key]);
-            $nbArgMax = count($serviceDefinition->getArguments()) - 1;
-            if ($nbArg > $nbArgMax) {
+            if ($nbArg > $max) {
                 throw new OutOfBoundsException(sprintf(
                     'The lifestream "%s" of type "%s" contains too much arguments (%d). It can contains at maximum %d argument(s).',
                     $key,
                     $service,
                     $nbArg,
-                    $nbArgMax
+                    $max
+                ));
+            } elseif ($nbArg < $min) {
+                throw new OutOfBoundsException(sprintf(
+                    'The lifestream "%s" of type "%s" contains too few arguments (%d). It can contains at min %d argument(s).',
+                    $key,
+                    $service,
+                    $nbArg,
+                    $min
                 ));
             }
 
             $serviceDefinition = new DefinitionDecorator($serviceId);
-            foreach ($args[$key] as $i => $arg) {
-                $serviceDefinition->replaceArgument($i, $arg);
-            }
+            $serviceDefinition->setArguments($args[$key]);
+            $serviceDefinition->addMethodCall('setClient', array(new Reference('lyrixx.lifestream.client')));
             $container->setDefinition('lyrixx.lifestream.my_service.'.$key, $serviceDefinition);
 
             $lifestreamDefinition = new DefinitionDecorator('lyrixx.lifestream.lifestream');
@@ -103,7 +131,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
             }
 
             $serviceDefinition = new DefinitionDecorator($this->availableServices[$service]);
-            $serviceDefinition->replaceArgument(0, $argsTmp);
+            $serviceDefinition->addArgument($argsTmp);
             $container->setDefinition('lyrixx.lifestream.my_service.'.$key, $serviceDefinition);
 
             $lifestreamDefinition = new DefinitionDecorator('lyrixx.lifestream.lifestream');
