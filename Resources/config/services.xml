@@ -19,6 +19,7 @@
         <parameter key="lyrixx.lifestream.service.github.class">Lyrixx\Lifestream\Service\Github</parameter>
         <parameter key="lyrixx.lifestream.service.rss20.class">Lyrixx\Lifestream\Service\Rss20</parameter>
         <parameter key="lyrixx.lifestream.service.atom.class">Lyrixx\Lifestream\Service\Atom</parameter>
+        <parameter key="lyrixx.lifestream.service.aggregate.class">Lyrixx\Lifestream\Service\Aggregate</parameter>
 
         <!-- Formatter class -->
         <parameter key="lyrixx.lifestream.formatter.link.class">Lyrixx\Lifestream\Formatter\Link</parameter>
@@ -75,6 +76,11 @@
             <argument /><!-- username -->
             <argument type="service" id="lyrixx.lifestream.client" />
             <tag name="lyrixx.lifestream.service" alias="atom" />
+        </service>
+        <service id="lyrixx.lifestream.service.lyrixx.lifestream.service.aggregate" class="%lyrixx.lifestream.service.aggregate.class%" abstract="true" public="false">
+            <argument /><!-- services -->
+            <argument type="service" id="lyrixx.lifestream.client" />
+            <tag name="lyrixx.lifestream.service" alias="aggregate" />
         </service>
 
         <!-- Formatters -->

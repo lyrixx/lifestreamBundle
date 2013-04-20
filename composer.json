@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "lyrixx/lifestream": "~1.0"
+        "lyrixx/lifestream": "~1.1"
     },
     "autoload": {
         "psr-0": { "Lyrixx\\Bundle\\LifestreamBundle": "" }
@@ -21,7 +21,7 @@
     "target-dir": "Lyrixx/Bundle/LifestreamBundle",
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.1-dev"
         }
     }
 }
