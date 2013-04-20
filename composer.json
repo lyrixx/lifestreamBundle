@@ -13,7 +13,8 @@
         }
     ],
     "require": {
-        "lyrixx/lifestream": "~1.1"
+        "lyrixx/lifestream": "~1.1",
+        "symfony/framework-bundle": "~2.1"
     },
     "autoload": {
         "psr-0": { "Lyrixx\\Bundle\\LifestreamBundle": "" }

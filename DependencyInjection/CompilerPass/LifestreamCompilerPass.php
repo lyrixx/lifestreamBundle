@@ -21,6 +21,10 @@ class LifestreamCompilerPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container)
     {
+        if (!$container->hasParameter('lyrixx.lifestream.config')) {
+            return;
+        }
+
         $config = $container->getParameter('lyrixx.lifestream.config');
         $container->setParameter('lyrixx.lifestream.config', null);
 
@@ -139,14 +143,14 @@ class LifestreamCompilerPass implements CompilerPassInterface
 
     private function validateFormatters($formatters, $key)
     {
-        $this->validateSymfonyServices($formatters, $this->availableFormatters, $key, 'formatters');
+        $this->validateSymfonyServices($formatters, $this->availableFormatters, $key, 'formatter');
 
         return $formatters;
     }
 
     private function validateFilters($filters, $key)
     {
-        $this->validateSymfonyServices($filters, $this->availableFilters, $key, 'filters');
+        $this->validateSymfonyServices($filters, $this->availableFilters, $key, 'filter');
 
         return $filters;
     }
