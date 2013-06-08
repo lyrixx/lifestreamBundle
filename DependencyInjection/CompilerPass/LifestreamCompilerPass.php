@@ -30,12 +30,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
         $config = $container->getParameter('lyrixx.lifestream.config');
         $container->setParameter('lyrixx.lifestream.config', null);
 
-        $this->availableServices = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.service');
-        $this->availableFormatters = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.formatter');
-        $this->availableFilters = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.filter');
-
-        $this->defaultFormatters = $this->validateFormatters($config['formatters'], '__default__');
-        $this->defaultFilters = $this->validateFilters($config['filters'], '__default__');
+        $this->extractAvailablesAndDefault($container, $config);
 
         $services = array();
         $args = array();
@@ -49,6 +44,12 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $args[$key] = $config['args'];
         }
 
+        $this->configureNonAggregateServices($container, $services, $formatters, $filters, $args);
+        $this->configureAggregateServices($container, $services, $formatters, $filters, $args);
+    }
+
+    private function configureNonAggregateServices(ContainerBuilder $container, $services, $formatters, $filters, $args)
+    {
         foreach ($services as $key => $service) {
             if ('aggregate' === $service) {
                 continue;
@@ -59,13 +60,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $class = $container->getParameterBag()->resolveValue($container->getDefinition($serviceId)->getClass());
             $r = new \ReflectionClass($class);
             if (!$r->implementsInterface(static::SERVICE_INTERFACE)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'The service "%s" (class: "%s"; used by the lifestream "%s") does not implements "%s"',
-                    $service,
-                    $class,
-                    $key,
-                    static::SERVICE_INTERFACE
-                ));
+                throw new \InvalidArgumentException(sprintf('The service "%s" (class: "%s"; used by the lifestream "%s") does not implements "%s"',$service,$class,$key,static::SERVICE_INTERFACE));
             }
 
             $r = new \ReflectionMethod($class, '__construct');
@@ -79,21 +74,9 @@ class LifestreamCompilerPass implements CompilerPassInterface
             }
             $nbArg = count($args[$key]);
             if ($nbArg > $max) {
-                throw new OutOfBoundsException(sprintf(
-                    'The lifestream "%s" of type "%s" contains too much arguments (%d). It should contains at maximum %d argument(s).',
-                    $key,
-                    $service,
-                    $nbArg,
-                    $max
-                ));
+                throw new OutOfBoundsException(sprintf('The lifestream "%s" of type "%s" contains too much arguments (%d). It should contains at maximum %d argument(s).', $key, $service, $nbArg, $max));
             } elseif ($nbArg < $min) {
-                throw new OutOfBoundsException(sprintf(
-                    'The lifestream "%s" of type "%s" contains too few arguments (%d). It should contains at least %d argument(s).',
-                    $key,
-                    $service,
-                    $nbArg,
-                    $min
-                ));
+                throw new OutOfBoundsException(sprintf('The lifestream "%s" of type "%s" contains too few arguments (%d). It should contains at least %d argument(s).', $key, $service, $nbArg, $min));
             }
 
             $serviceDefinition = new DefinitionDecorator($serviceId);
@@ -111,7 +94,10 @@ class LifestreamCompilerPass implements CompilerPassInterface
 
             $this->availableConcreatServices[] = $key;
         }
+    }
 
+    private function configureAggregateServices(ContainerBuilder $container, $services, $formatters, $filters, $args)
+    {
         foreach ($services as $key => $service) {
             if ('aggregate' !== $service) {
                 continue;
@@ -120,12 +106,7 @@ class LifestreamCompilerPass implements CompilerPassInterface
             $argsTmp = array();
             foreach ($args[$key] as $arg) {
                 if (!in_array($arg, $this->availableConcreatServices)) {
-                    throw new \InvalidArgumentException(sprintf(
-                        'The lifestream "%s" uses an unknow service "%s". Known services are "%s"',
-                        $key,
-                        $arg,
-                        implode('", "', $this->availableConcreatServices)
-                    ));
+                    throw new \InvalidArgumentException(sprintf('The lifestream "%s" uses an unknow service "%s". Known services are "%s"', $key, $arg, implode('", "', $this->availableConcreatServices)));
                 }
                 $argsTmp[] = new Reference('lyrixx.lifestream.my_service.'.$arg);
             }
@@ -142,10 +123,19 @@ class LifestreamCompilerPass implements CompilerPassInterface
 
             $container->setDefinition('lyrixx.lifestream.my.'.$key, $lifestreamDefinition);
         }
-
     }
 
-    private function extractSymfonyServicesAvailable($container, $tag)
+    private function extractAvailablesAndDefault(ContainerBuilder $container, $config)
+    {
+        $this->availableServices = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.service');
+        $this->availableFormatters = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.formatter');
+        $this->availableFilters = $this->extractSymfonyServicesAvailable($container, 'lyrixx.lifestream.filter');
+
+        $this->defaultFormatters = $this->validateFormatters($config['formatters'], '__default__');
+        $this->defaultFilters = $this->validateFilters($config['filters'], '__default__');
+    }
+
+    private function extractSymfonyServicesAvailable(ContainerBuilder $container, $tag)
     {
         $services = array();
 
